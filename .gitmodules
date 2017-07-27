@@ -1,0 +1,6 @@
+[submodule "libzmq"]
+	path = libzmq
+	url = https://github.com/k9webprotection/libzmq.git
+[submodule "zmqcpp"]
+	path = zmqcpp
+	url = https://github.com/k9webprotection/zmqcpp.git
