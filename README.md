@@ -4,8 +4,8 @@ This project provides some prebuilt ZeroMQ configuration scripts for easy buildi
 
 You can check these directories out in any location on your computer, but the default location that the `build.sh` script looks for is as a parent directory to where you check out the [k9webprotection/libzmq][libzmq-release] and [k9webprotection/zmqcpp][zmqcpp-release] git projects.  By default, this project contains submodules of the subprojects in the correct locations.
 
-[libzmq-release]: https://github.com/zeromq/libzmq
-[zmqcpp-release]: https://github.com/alanw/zmqcpp
+[libzmq-release]: https://github.com/k9webprotection/libzmq
+[zmqcpp-release]: https://github.com/k9webprotection/zmqcpp
 
 ### Requirements ###
 
