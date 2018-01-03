@@ -255,7 +255,7 @@ do_package() {
     BASE="zeromq-$(grep '^Version:' "${PATH_TO_LIBZMQ_DIST}/packaging/redhat/zeromq.spec" | \
                    cut -d':' -f2 | sed -e 's/ *//g')"
     cp -r "${OBJDIR_ROOT}" "${BASE}" || exit $?
-    rm -rf "${BASE}/"*"/build" || exit $?
+    rm -rf "${BASE}/"*"/build" "${BASE}/logs" || exit $?
     find "${BASE}" -name .DS_Store -exec rm {} \; || exit $?
     tar -zcvpf "${1}/${BASE}.tar.gz" "${BASE}" || exit $?
     rm -rf "${BASE}"
