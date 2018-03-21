@@ -1,6 +1,6 @@
 [submodule "libzmq"]
 	path = libzmq
 	url = https://github.com/toonetown/libzmq.git
-[submodule "zmqcpp"]
-	path = zmqcpp
-	url = https://github.com/toonetown/zmqcpp.git
+[submodule "cppzmq"]
+	path = cppzmq
+	url = https://github.com/toonetown/cppzmq.git

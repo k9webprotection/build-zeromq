@@ -1,11 +1,11 @@
 ## ZeroMQ Building ##
 
-This project provides some prebuilt ZeroMQ configuration scripts for easy building on various platforms.  It contains as a submodule, the [toonetown/libzmq][libzmq-release] and [toonetown/zmqcpp][zmqcpp-release] git projects.
+This project provides some prebuilt ZeroMQ configuration scripts for easy building on various platforms.  It contains as a submodule, the [toonetown/libzmq][libzmq-release] and [toonetown/cppzmq][cppzmq-release] git projects.
 
-You can check these directories out in any location on your computer, but the default location that the `build.sh` script looks for is as a parent directory to where you check out the [toonetown/libzmq][libzmq-release] and [toonetown/zmqcpp][zmqcpp-release] git projects.  By default, this project contains submodules of the subprojects in the correct locations.
+You can check these directories out in any location on your computer, but the default location that the `build.sh` script looks for is as a parent directory to where you check out the [toonetown/libzmq][libzmq-release] and [toonetown/cppzmq][cppzmq-release] git projects.  By default, this project contains submodules of the subprojects in the correct locations.
 
 [libzmq-release]: https://github.com/toonetown/libzmq
-[zmqcpp-release]: https://github.com/toonetown/zmqcpp
+[cppzmq-release]: https://github.com/toonetown/cppzmq
 
 ### Requirements ###
 
@@ -38,7 +38,7 @@ To build for Android:
 
 You can build the libraries using the `build.sh` script:
 
-    ./build.sh [/path/to/libzmq-dist] [/path/to/zmqcpp-dist] <plat.arch|plat|'clean'>
+    ./build.sh [/path/to/libzmq-dist] [/path/to/cppzmq-dist] <plat.arch|plat|'clean'>
 
 Run `./build.sh` itself to see details on its options.
 

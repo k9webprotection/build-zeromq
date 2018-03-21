@@ -12,7 +12,7 @@ HB_BOOTSTRAP="t:*toonetown/android b:android-ndk
 
 # Overridable build locations
 : ${DEFAULT_LIBZMQ_DIST:="${BUILD_DIR}/libzmq"}
-: ${DEFAULT_ZMQCPP_DIST:="${BUILD_DIR}/zmqcpp"}
+: ${DEFAULT_CPPZMQ_DIST:="${BUILD_DIR}/cppzmq"}
 : ${OBJDIR_ROOT:="${BUILD_DIR}/target"}
 : ${CONFIGS_DIR:="${BUILD_DIR}/configs"}
 : ${MAKE_BUILD_PARALLEL:=$(sysctl -n hw.ncpu)}
@@ -22,7 +22,7 @@ HB_BOOTSTRAP="t:*toonetown/android b:android-ndk
 : ${LIBZMQ_BUILD_OPTIONS:="--disable-eventfd --with-libsodium=no"}
 
 # Include files to copy
-ZMQCPP_INCLUDE_FILES="include/zmqcpp.h"
+CPPZMQ_INCLUDE_FILES="zmq.hpp zmq_addon.hpp"
 
 list_arch() {
     if [ -z "${1}" ]; then
@@ -47,12 +47,12 @@ print_usage() {
         shift 1
         if [ $# -eq 0 ]; then echo "" >&2; fi
     done
-    echo "Usage: ${0} [/path/to/libzmq-dist] [/path/to/zmqcpp-dist] <plat.arch|plat|'bootstrap'|'clean'>"   >&2
+    echo "Usage: ${0} [/path/to/libzmq-dist] [/path/to/cppzmq-dist] <plat.arch|plat|'bootstrap'|'clean'>"   >&2
     echo ""                                                                                                 >&2
     echo "\"/path/to/libzmq-dist\" is optional and defaults to:"                                            >&2
     echo "    \"${DEFAULT_LIBZMQ_DIST}\""                                                                   >&2
-    echo "\"/path/to/zmqcpp-dist\" is optional and defaults to:"                                            >&2
-    echo "    \"${DEFAULT_ZMQCPP_DIST}\""                                                                   >&2
+    echo "\"/path/to/cppzmq-dist\" is optional and defaults to:"                                            >&2
+    echo "    \"${DEFAULT_CPPZMQ_DIST}\""                                                                   >&2
     echo ""                                                                                                 >&2
     echo "Possible plat.arch combinations are:"                                                             >&2
     for p in $(list_plats); do
@@ -143,10 +143,10 @@ do_build() {
         do_build_libzmq ${TARGET} "${OBJDIR_ROOT}/objdir-${TARGET}" || return $?
         
         # Copy the zmcqpp include files
-        for h in ${ZMQCPP_INCLUDE_FILES}; do
+        for h in ${CPPZMQ_INCLUDE_FILES}; do
             ODIR="${OBJDIR_ROOT}/objdir-${TARGET}/$(dirname "${h}")"
             mkdir -p "${ODIR}" || return $?
-            cp "${PATH_TO_ZMQCPP_DIST}/${h}" "${ODIR}" || return $?
+            cp "${PATH_TO_CPPZMQ_DIST}/${h}" "${ODIR}" || return $?
         done
     elif [ -n "${TARGET}" -a -n "$(list_arch ${TARGET})" ]; then
         PLATFORM="${TARGET}"
@@ -261,7 +261,7 @@ do_package() {
     rm -rf "${BASE}"
 }
 
-# Calculate the path to the libzmq-dist and zmqcpp-dist repositories
+# Calculate the path to the libzmq-dist and cppzmq-dist repositories
 if [ -d "${1}" -a -f "${1}/src/libzmq.vers" ]; then
     cd "${1}"
     PATH_TO_LIBZMQ_DIST="$(pwd)"
@@ -275,16 +275,16 @@ fi
     exit $?
 }
 
-if [ -d "${1}" -a -f "${1}/include/zmqcpp.h" ]; then
+if [ -d "${1}" -a -f "${1}/zmq.hpp" ]; then
     cd "${1}"
-    PATH_TO_ZMQCPP_DIST="$(pwd)"
+    PATH_TO_CPPZMQ_DIST="$(pwd)"
     cd ->/dev/null
     shift 1
 else
-    PATH_TO_ZMQCPP_DIST="${DEFAULT_ZMQCPP_DIST}"
+    PATH_TO_CPPZMQ_DIST="${DEFAULT_CPPZMQ_DIST}"
 fi
-[ -d "${PATH_TO_ZMQCPP_DIST}" -a -f "${PATH_TO_ZMQCPP_DIST}/include/zmqcpp.h" ] || {
-    print_usage "Invalid zmqcpp directory:" "    \"${PATH_TO_ZMQCPP_DIST}\""
+[ -d "${PATH_TO_CPPZMQ_DIST}" -a -f "${PATH_TO_CPPZMQ_DIST}/zmq.hpp" ] || {
+    print_usage "Invalid cppzmq directory:" "    \"${PATH_TO_CPPZMQ_DIST}\""
     exit $?
 }
 
