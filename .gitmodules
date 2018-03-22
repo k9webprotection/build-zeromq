@@ -1,6 +1,9 @@
 [submodule "libzmq"]
 	path = libzmq
 	url = https://github.com/toonetown/libzmq.git
-[submodule "cppzmq"]
-	path = cppzmq
+[submodule "bindings/azmq"]
+	path = bindings/azmq
+	url = https://github.com/toonetown/azmq.git
+[submodule "bindings/cppzmq"]
+	path = bindings/cppzmq
 	url = https://github.com/toonetown/cppzmq.git

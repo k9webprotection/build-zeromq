@@ -12,7 +12,8 @@ HB_BOOTSTRAP="t:*toonetown/android b:android-ndk
 
 # Overridable build locations
 : ${DEFAULT_LIBZMQ_DIST:="${BUILD_DIR}/libzmq"}
-: ${DEFAULT_CPPZMQ_DIST:="${BUILD_DIR}/cppzmq"}
+: ${DEFAULT_CPPZMQ_DIST:="${BUILD_DIR}/bindings/cppzmq"}
+: ${DEFAULT_AZMQ_DIST:="${BUILD_DIR}/bindings/azmq"}
 : ${OBJDIR_ROOT:="${BUILD_DIR}/target"}
 : ${CONFIGS_DIR:="${BUILD_DIR}/configs"}
 : ${MAKE_BUILD_PARALLEL:=$(sysctl -n hw.ncpu)}
@@ -23,6 +24,7 @@ HB_BOOTSTRAP="t:*toonetown/android b:android-ndk
 
 # Include files to copy
 CPPZMQ_INCLUDE_FILES="zmq.hpp zmq_addon.hpp"
+AZMQ_INCLUDE_DIRS="azmq"
 
 list_arch() {
     if [ -z "${1}" ]; then
@@ -47,33 +49,36 @@ print_usage() {
         shift 1
         if [ $# -eq 0 ]; then echo "" >&2; fi
     done
-    echo "Usage: ${0} [/path/to/libzmq-dist] [/path/to/cppzmq-dist] <plat.arch|plat|'bootstrap'|'clean'>"   >&2
-    echo ""                                                                                                 >&2
-    echo "\"/path/to/libzmq-dist\" is optional and defaults to:"                                            >&2
-    echo "    \"${DEFAULT_LIBZMQ_DIST}\""                                                                   >&2
-    echo "\"/path/to/cppzmq-dist\" is optional and defaults to:"                                            >&2
-    echo "    \"${DEFAULT_CPPZMQ_DIST}\""                                                                   >&2
-    echo ""                                                                                                 >&2
-    echo "Possible plat.arch combinations are:"                                                             >&2
+    echo "Usage: ${0} [/path/to/libzmq-dist] [/paths/to/bindings...] <plat.arch|plat|'bootstrap'|'clean'>"    >&2
+    echo ""                                                                                                   >&2
+    echo "\"/path/to/libzmq-dist\" is optional and defaults to:"                                              >&2
+    echo "    \"${DEFAULT_LIBZMQ_DIST}\""                                                                     >&2
+    echo "\"/paths/to/bindings\" is one or more optional paths to binding distributions, required are:"       >&2
+    echo "    \"/path/to/cppzmq-dist\" is optional and defaults to:"                                          >&2
+    echo "        \"${DEFAULT_CPPZMQ_DIST}\""                                                                 >&2
+    echo "    \"/path/to/azmq-dist\" is optional and defaults to:"                                            >&2
+    echo "        \"${DEFAULT_AZMQ_DIST}\""                                                                   >&2
+    echo ""                                                                                                   >&2
+    echo "Possible plat.arch combinations are:"                                                               >&2
     for p in $(list_plats); do
-        echo "    ${p}:"                                                                                    >&2
-        echo "        $(list_arch ${p})"                                                                    >&2
-        echo ""                                                                                             >&2
+        echo "    ${p}:"                                                                                      >&2
+        echo "        $(list_arch ${p})"                                                                      >&2
+        echo ""                                                                                               >&2
     done
-    echo "If you specify just a plat, then *all* architectures will be built for that"                      >&2
-    echo "platform, and the resulting libraries will be \"lipo\"-ed together to a single"                   >&2
-    echo "fat binary (if supported)."                                                                       >&2
-    echo ""                                                                                                 >&2
-    echo "When specifying clean, you may optionally include a plat or plat.arch to clean,"                  >&2
-    echo "i.e. \"${0} clean macosx.i386\" to clean only the i386 architecture on Mac OS X"                  >&2
-    echo "or \"${0} clean ios\" to clean all ios builds."                                                   >&2
-    echo ""                                                                                                 >&2
-    echo "You can copy the windows outputs to non-windows target directory by running"                      >&2
-    echo "\"${0} copy-windows /path/to/windows/target"                                                      >&2
-    echo ""                                                                                                 >&2
-    echo "You can specify to package the release (after it's already been built) by"                        >&2
-    echo "running \"${0} package /path/to/output"                                                           >&2
-    echo ""                                                                                                 >&2
+    echo "If you specify just a plat, then *all* architectures will be built for that"                        >&2
+    echo "platform, and the resulting libraries will be \"lipo\"-ed together to a single"                     >&2
+    echo "fat binary (if supported)."                                                                         >&2
+    echo ""                                                                                                   >&2
+    echo "When specifying clean, you may optionally include a plat or plat.arch to clean,"                    >&2
+    echo "i.e. \"${0} clean macosx.i386\" to clean only the i386 architecture on Mac OS X"                    >&2
+    echo "or \"${0} clean ios\" to clean all ios builds."                                                     >&2
+    echo ""                                                                                                   >&2
+    echo "You can copy the windows outputs to non-windows target directory by running"                        >&2
+    echo "\"${0} copy-windows /path/to/windows/target"                                                        >&2
+    echo ""                                                                                                   >&2
+    echo "You can specify to package the release (after it's already been built) by"                          >&2
+    echo "running \"${0} package /path/to/output"                                                             >&2
+    echo ""                                                                                                   >&2
     return 1
 }
 
@@ -142,11 +147,17 @@ do_build() {
         source "${CONFIG_SETUP}" && source "${GEN_SCRIPT}" || return $?
         do_build_libzmq ${TARGET} "${OBJDIR_ROOT}/objdir-${TARGET}" || return $?
         
-        # Copy the zmcqpp include files
+        # Copy the cppzmq include files
         for h in ${CPPZMQ_INCLUDE_FILES}; do
-            ODIR="${OBJDIR_ROOT}/objdir-${TARGET}/$(dirname "${h}")"
+            ODIR="${OBJDIR_ROOT}/objdir-${TARGET}/include/$(dirname "${h}")"
             mkdir -p "${ODIR}" || return $?
-            cp "${PATH_TO_CPPZMQ_DIST}/${h}" "${ODIR}" || return $?
+            cp "${PATH_TO_CPPZMQ_DIST}/${h}" "${ODIR}/" || return $?
+        done
+        # Copy the amzq include files
+        for h in ${AZMQ_INCLUDE_DIRS}; do
+            ODIR="${OBJDIR_ROOT}/objdir-${TARGET}/include/$(dirname "${h}")"
+            mkdir -p "${ODIR}" || return $?
+            cp -r "${PATH_TO_AZMQ_DIST}/${h}" "${ODIR}/" || return $?
         done
     elif [ -n "${TARGET}" -a -n "$(list_arch ${TARGET})" ]; then
         PLATFORM="${TARGET}"
@@ -261,7 +272,7 @@ do_package() {
     rm -rf "${BASE}"
 }
 
-# Calculate the path to the libzmq-dist and cppzmq-dist repositories
+# Calculate the path to the libzmq-dist and binding repositories
 if [ -d "${1}" -a -f "${1}/src/libzmq.vers" ]; then
     cd "${1}"
     PATH_TO_LIBZMQ_DIST="$(pwd)"
@@ -285,6 +296,19 @@ else
 fi
 [ -d "${PATH_TO_CPPZMQ_DIST}" -a -f "${PATH_TO_CPPZMQ_DIST}/zmq.hpp" ] || {
     print_usage "Invalid cppzmq directory:" "    \"${PATH_TO_CPPZMQ_DIST}\""
+    exit $?
+}
+
+if [ -d "${1}" -a -f "${1}/azmq/socket.hpp" ]; then
+    cd "${1}"
+    PATH_TO_AZMQ_DIST="$(pwd)"
+    cd ->/dev/null
+    shift 1
+else
+    PATH_TO_AZMQ_DIST="${DEFAULT_AZMQ_DIST}"
+fi
+[ -d "${PATH_TO_AZMQ_DIST}" -a -f "${PATH_TO_AZMQ_DIST}/azmq/socket.hpp" ] || {
+    print_usage "Invalid azmq directory:" "    \"${PATH_TO_AZMQ_DIST}\""
     exit $?
 }
 

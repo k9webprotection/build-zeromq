@@ -5,7 +5,8 @@ SET SCRIPT_NAME=%~0
 
 :: Overridable build locations
 IF "%DEFAULT_LIBZMQ_DIST%"=="" SET DEFAULT_LIBZMQ_DIST=%BUILD_DIR%\libzmq
-IF "%DEFAULT_CPPZMQ_DIST%"=="" SET DEFAULT_CPPZMQ_DIST=%BUILD_DIR%\cppzmq
+IF "%DEFAULT_CPPZMQ_DIST%"=="" SET DEFAULT_CPPZMQ_DIST=%BUILD_DIR%\bindings\cppzmq
+IF "%DEFAULT_AZMQ_DIST%"=="" SET DEFAULT_AZMQ_DIST=%BUILD_DIR%\bindings\azmq
 IF "%OBJDIR_ROOT%"=="" SET OBJDIR_ROOT=%BUILD_DIR%\target
 IF "%CONFIGS_DIR%"=="" SET CONFIGS_DIR=%BUILD_DIR%\configs
 
@@ -34,6 +35,7 @@ IF "%MSVC_BUILD_PARALLEL%"=="" SET MSVC_BUILD_PARALLEL=%NUMBER_OF_PROCESSORS%
 
 :: Include files to copy
 SET CPPZMQ_INCLUDE_FILES=zmq.hpp zmq_addon.hpp
+SET AZMQ_INCLUDE_DIRS=azmq
 
 :: Calculate the path to the libzmq-dist repository
 IF EXIST "%~f1" (
@@ -61,6 +63,19 @@ IF NOT EXIST "%PATH_TO_CPPZMQ_DIST%\zmq.hpp" (
     GOTO print_usage
 )
 
+:: Calculate the path to the azmq-dist repository
+IF EXIST "%~f1" (
+	SET PATH_TO_AZMQ_DIST=%~f1
+	SHIFT
+) ELSE (
+	SET PATH_TO_AZMQ_DIST=%DEFAULT_AZMQ_DIST%
+)
+IF NOT EXIST "%PATH_TO_AZMQ_DIST%\azmq\socket.hpp" (
+    echo Invalid azmq directory: 1>&2
+    echo     "%PATH_TO_AZMQ_DIST%" 1>&2
+    GOTO print_usage
+)
+
 
 :: Set up the target and the command-line arguments
 SET TARGET=%1
@@ -84,12 +99,15 @@ exit /B 0
 
 
 :print_usage
-    echo Usage: %SCRIPT_NAME% \path\to\libzmq-dist \path\to\cppzmq-dist ^<arch^|'clean'^> 1>&2
+    echo Usage: %SCRIPT_NAME% \path\to\libzmq-dist \paths\to\bindings... ^<arch^|'clean'^> 1>&2
     echo. 1>&2
     echo "\path\to\libzmq-dist" is optional and defaults to: 1>&2
     echo     "%DEFAULT_LIBZMQ_DIST%" 1>&2
-    echo "\path\to\cppzmq-dist" is optional and defaults to: 1>&2
-    echo     "%DEFAULT_CPPZMQ_DIST%" 1>&2
+    echo "\paths\to\bindings" is one or more optional paths to binding distributions, required are: 1>&2
+    echo     "\path\to\cppzmq-dist" is optional and defaults to: 1>&2
+    echo         "%DEFAULT_CPPZMQ_DIST%" 1>&2
+    echo     "\path\to\azmq-dist" is optional and defaults to: 1>&2
+    echo         "%DEFAULT_AZMQ_DIST%" 1>&2
     echo. 1>&2
     CALL :get_archs
     echo Possible architectures are:
@@ -171,6 +189,12 @@ exit /B 0
         :: Copy the cppzmq include files
         FOR %%h in (%CPPZMQ_INCLUDE_FILES%) DO (
             copy /Y "%PATH_TO_CPPZMQ_DIST%\%%h" "%OBJDIR_ROOT%\objdir-%BUILD_PLATFORM_NAME%.%~1\include" || (
+                POPD & exit /B 1
+            )
+        )
+        :: Copy the azmq include files
+        FOR %%h in (%AZMQ_INCLUDE_DIRS%) DO (
+            xcopy /I /S "%PATH_TO_AZMQ_DIST%\%%h" "%OBJDIR_ROOT%\objdir-%BUILD_PLATFORM_NAME%.%~1\include\%%h" || (
                 POPD & exit /B 1
             )
         )
