@@ -6,6 +6,7 @@ SET SCRIPT_NAME=%~0
 :: Overridable build locations
 IF "%DEFAULT_LIBZMQ_DIST%"=="" SET DEFAULT_LIBZMQ_DIST=%BUILD_DIR%\libzmq
 IF "%DEFAULT_CPPZMQ_DIST%"=="" SET DEFAULT_CPPZMQ_DIST=%BUILD_DIR%\bindings\cppzmq
+IF "%DEFAULT_ZMQCPP_DIST%"=="" SET DEFAULT_ZMQCPP_DIST=%BUILD_DIR%\bindings\zmqcpp
 IF "%DEFAULT_AZMQ_DIST%"=="" SET DEFAULT_AZMQ_DIST=%BUILD_DIR%\bindings\azmq
 IF "%OBJDIR_ROOT%"=="" SET OBJDIR_ROOT=%BUILD_DIR%\target
 IF "%CONFIGS_DIR%"=="" SET CONFIGS_DIR=%BUILD_DIR%\configs
@@ -35,6 +36,7 @@ IF "%MSVC_BUILD_PARALLEL%"=="" SET MSVC_BUILD_PARALLEL=%NUMBER_OF_PROCESSORS%
 
 :: Include files to copy
 SET CPPZMQ_INCLUDE_FILES=zmq.hpp zmq_addon.hpp
+SET ZMQCPP_INCLUDE_FILES=include^\zmqcpp.h
 SET AZMQ_INCLUDE_DIRS=azmq
 
 :: Calculate the path to the libzmq-dist repository
@@ -60,6 +62,19 @@ IF EXIST "%~f1" (
 IF NOT EXIST "%PATH_TO_CPPZMQ_DIST%\zmq.hpp" (
     echo Invalid cppzmq directory: 1>&2
     echo     "%PATH_TO_CPPZMQ_DIST%" 1>&2
+    GOTO print_usage
+)
+
+:: Calculate the path to the zmqcpp-dist repository
+IF EXIST "%~f1" (
+    SET PATH_TO_ZMQCPP_DIST=%~f1
+    SHIFT
+) ELSE (
+    SET PATH_TO_ZMQCPP_DIST=%DEFAULT_ZMQCPP_DIST%
+)
+IF NOT EXIST "%PATH_TO_ZMQCPP_DIST%\include\zmqcpp.h" (
+    echo Invalid zmqcpp directory: 1>&2
+    echo     "%PATH_TO_ZMQCPP_DIST%" 1>&2
     GOTO print_usage
 )
 
@@ -106,6 +121,8 @@ exit /B 0
     echo "\paths\to\bindings" is one or more optional paths to binding distributions, required are: 1>&2
     echo     "\path\to\cppzmq-dist" is optional and defaults to: 1>&2
     echo         "%DEFAULT_CPPZMQ_DIST%" 1>&2
+    echo     "\path\to\zmqcpp-dist" is optional and defaults to: 1>&2
+    echo         "%DEFAULT_ZMQCPP_DIST%" 1>&2
     echo     "\path\to\azmq-dist" is optional and defaults to: 1>&2
     echo         "%DEFAULT_AZMQ_DIST%" 1>&2
     echo. 1>&2
@@ -189,6 +206,12 @@ exit /B 0
         :: Copy the cppzmq include files
         FOR %%h in (%CPPZMQ_INCLUDE_FILES%) DO (
             copy /Y "%PATH_TO_CPPZMQ_DIST%\%%h" "%OBJDIR_ROOT%\objdir-%BUILD_PLATFORM_NAME%.%~1\include" || (
+                POPD & exit /B 1
+            )
+        )
+        :: Copy the zmqcpp include files
+        FOR %%h in (%ZMQCPP_INCLUDE_FILES%) DO (
+            copy /Y "%PATH_TO_ZMQCPP_DIST%\%%h" "%OBJDIR_ROOT%\objdir-%BUILD_PLATFORM_NAME%.%~1\include" || (
                 POPD & exit /B 1
             )
         )

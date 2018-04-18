@@ -13,6 +13,7 @@ HB_BOOTSTRAP="t:*toonetown/android b:android-ndk
 # Overridable build locations
 : ${DEFAULT_LIBZMQ_DIST:="${BUILD_DIR}/libzmq"}
 : ${DEFAULT_CPPZMQ_DIST:="${BUILD_DIR}/bindings/cppzmq"}
+: ${DEFAULT_ZMQCPP_DIST:="${BUILD_DIR}/bindings/zmqcpp"}
 : ${DEFAULT_AZMQ_DIST:="${BUILD_DIR}/bindings/azmq"}
 : ${OBJDIR_ROOT:="${BUILD_DIR}/target"}
 : ${CONFIGS_DIR:="${BUILD_DIR}/configs"}
@@ -24,6 +25,7 @@ HB_BOOTSTRAP="t:*toonetown/android b:android-ndk
 
 # Include files to copy
 CPPZMQ_INCLUDE_FILES="zmq.hpp zmq_addon.hpp"
+ZMQCPP_INCLUDE_FILES="include/zmqcpp.h"
 AZMQ_INCLUDE_DIRS="azmq"
 
 list_arch() {
@@ -56,6 +58,8 @@ print_usage() {
     echo "\"/paths/to/bindings\" is one or more optional paths to binding distributions, required are:"       >&2
     echo "    \"/path/to/cppzmq-dist\" is optional and defaults to:"                                          >&2
     echo "        \"${DEFAULT_CPPZMQ_DIST}\""                                                                 >&2
+    echo "    \"/path/to/zmqcpp-dist\" is optional and defaults to:"                                          >&2
+    echo "        \"${DEFAULT_ZMQCPP_DIST}\""                                                                 >&2
     echo "    \"/path/to/azmq-dist\" is optional and defaults to:"                                            >&2
     echo "        \"${DEFAULT_AZMQ_DIST}\""                                                                   >&2
     echo ""                                                                                                   >&2
@@ -152,6 +156,12 @@ do_build() {
             ODIR="${OBJDIR_ROOT}/objdir-${TARGET}/include/$(dirname "${h}")"
             mkdir -p "${ODIR}" || return $?
             cp "${PATH_TO_CPPZMQ_DIST}/${h}" "${ODIR}/" || return $?
+        done
+        # Copy the zmqcpp include files
+        for h in ${ZMQCPP_INCLUDE_FILES}; do
+            ODIR="${OBJDIR_ROOT}/objdir-${TARGET}/$(dirname "${h}")"
+            mkdir -p "${ODIR}" || return $?
+            cp "${PATH_TO_ZMQCPP_DIST}/${h}" "${ODIR}" || return $?
         done
         # Copy the amzq include files
         for h in ${AZMQ_INCLUDE_DIRS}; do
@@ -272,7 +282,7 @@ do_package() {
     rm -rf "${BASE}"
 }
 
-# Calculate the path to the libzmq-dist and binding repositories
+# Calculate the path to the binding repositories
 if [ -d "${1}" -a -f "${1}/src/libzmq.vers" ]; then
     cd "${1}"
     PATH_TO_LIBZMQ_DIST="$(pwd)"
@@ -296,6 +306,19 @@ else
 fi
 [ -d "${PATH_TO_CPPZMQ_DIST}" -a -f "${PATH_TO_CPPZMQ_DIST}/zmq.hpp" ] || {
     print_usage "Invalid cppzmq directory:" "    \"${PATH_TO_CPPZMQ_DIST}\""
+    exit $?
+}
+
+if [ -d "${1}" -a -f "${1}/include/zmqcpp.h" ]; then
+    cd "${1}"
+    PATH_TO_ZMQCPP_DIST="$(pwd)"
+    cd ->/dev/null
+    shift 1
+else
+    PATH_TO_ZMQCPP_DIST="${DEFAULT_ZMQCPP_DIST}"
+fi
+[ -d "${PATH_TO_ZMQCPP_DIST}" -a -f "${PATH_TO_ZMQCPP_DIST}/include/zmqcpp.h" ] || {
+    print_usage "Invalid zmqcpp directory:" "    \"${PATH_TO_ZMQCPP_DIST}\""
     exit $?
 }
 

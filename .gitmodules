@@ -7,3 +7,6 @@
 [submodule "bindings/cppzmq"]
 	path = bindings/cppzmq
 	url = https://github.com/toonetown/cppzmq.git
+[submodule "bindings/zmqcpp"]
+	path = bindings/zmqcpp
+	url = https://github.com/toonetown/zmqcpp.git
