@@ -7,4 +7,4 @@ GEN_SCRIPT="${CONFIGS_DIR}/common-standalone-android.sh"
     return 1
 }
 
-ANDROID_PLATFORM="${ANDROID_PLATFORM:-22}"
+ANDROID_PLATFORM="${ANDROID_PLATFORM:-26}"
