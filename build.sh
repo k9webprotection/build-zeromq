@@ -284,6 +284,7 @@ do_package() {
                    cut -d':' -f2 | sed -e 's/ *//g')"
     cp -r "${OBJDIR_ROOT}" "${BASE}" || exit $?
     rm -rf "${BASE}/"*"/build" "${BASE}/logs" || exit $?
+    rm -rf "${BASE}/objdir-macosx.x86_64" || return $?
     find "${BASE}" -name .DS_Store -exec rm {} \; || exit $?
     tar -zcvpf "${1}/${BASE}.tar.gz" "${BASE}" || exit $?
     rm -rf "${BASE}"
