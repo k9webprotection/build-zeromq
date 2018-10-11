@@ -34,6 +34,9 @@ IF "%MSVC_VERSION_INT%"=="14.1" (
 :: Options to control the build
 IF "%MSVC_BUILD_PARALLEL%"=="" SET MSVC_BUILD_PARALLEL=%NUMBER_OF_PROCESSORS%
 
+:: Options for ZeroMQ build
+IF "%LIBZMQ_BUILD_OPTIONS%"=="" SET LIBZMQ_BUILD_OPTIONS=/p:Option-tweet=false
+
 :: Include files to copy
 SET CPPZMQ_INCLUDE_FILES=zmq.hpp zmq_addon.hpp
 SET ZMQCPP_INCLUDE_FILES=include^\zmqcpp.h
@@ -148,6 +151,7 @@ exit /B 0
 :do_msbuild_libzmq
     "%MSBUILD_EXE%" builds\msvc\%VSVERSION%\libzmq.sln /t:libzmq:Rebuild ^
                     /p:Configuration=%~1 /p:Platform=%VS_PLATFORM% /m:%MSVC_BUILD_PARALLEL% ^
+                    %LIBZMQ_BUILD_OPTIONS% ^
                     /p:TargetName=%~2 /p:OutDir=%~3\lib\ || exit /B %ERRORLEVEL%
 @exit /B 0
 

@@ -24,7 +24,7 @@ HB_BOOTSTRAP="t:*toonetown/android b:android-ndk
 
 # Options for ZeroMQ build options
 : ${COMMON_LIBZMQ_BUILD_OPTIONS:="--enable-static --disable-shared"}
-: ${LIBZMQ_BUILD_OPTIONS:="--disable-eventfd --with-libsodium=no"}
+: ${LIBZMQ_BUILD_OPTIONS:="--disable-eventfd --disable-curve --with-libsodium=no"}
 
 # Include files to copy
 CPPZMQ_INCLUDE_FILES="zmq.hpp zmq_addon.hpp"
