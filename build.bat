@@ -22,9 +22,11 @@ IF "%MSVC_VERSION%"=="" (
 IF "%MSVC_VERSION_INT%"=="14.1" (
     SET MSBUILD_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe
     SET VSVERSION=vs2017
+    SET VSGEN_NAME=Visual Studio 15 2017
 ) ELSE IF "%MSVC_VERSION_INT%"=="14.0" (
     SET MSBUILD_EXE=C:\Program Files (x86^)\MSBuild\14.0\Bin\MSBuild.exe
     SET VSVERSION=vs2015
+    SET VSGEN_NAME=Visual Studio 15 2015
 ) ELSE (
     echo Unsupported MSVC version "%MSVC_VERSION_INT%". 1>&2
     echo. 1>&2
@@ -35,7 +37,12 @@ IF "%MSVC_VERSION_INT%"=="14.1" (
 IF "%MSVC_BUILD_PARALLEL%"=="" SET MSVC_BUILD_PARALLEL=%NUMBER_OF_PROCESSORS%
 
 :: Options for ZeroMQ build
-IF "%LIBZMQ_BUILD_OPTIONS%"=="" SET LIBZMQ_BUILD_OPTIONS=/p:Option-tweet=false
+IF "%CMAKE_OPTS%"=="" SET CMAKE_OPTS=-DWITH_DOCS=OFF ^
+                                     -DBUILD_TESTS=OFF ^
+                                     -DBUILD_SHARED=OFF ^
+                                     -DENABLE_CURVE=OFF ^
+                                     -DWITH_LIBSODIUM=OFF ^
+                                     -DENABLE_CPACK=OFF
 
 :: Include files to copy
 SET CPPZMQ_INCLUDE_FILES=zmq.hpp zmq_addon.hpp
@@ -149,9 +156,8 @@ exit /B 0
 @exit /B 0
 
 :do_msbuild_libzmq
-    "%MSBUILD_EXE%" builds\msvc\%VSVERSION%\libzmq.sln /t:libzmq:Rebuild ^
+    "%MSBUILD_EXE%" cmake-build\ZeroMQ.sln /t:libzmq-static:Rebuild ^
                     /p:Configuration=%~1 /p:Platform=%VS_PLATFORM% /m:%MSVC_BUILD_PARALLEL% ^
-                    %LIBZMQ_BUILD_OPTIONS% ^
                     /p:TargetName=%~2 /p:OutDir=%~3\lib\ || exit /B %ERRORLEVEL%
 @exit /B 0
 
@@ -164,17 +170,29 @@ exit /B 0
     IF NOT EXIST "%BUILD_ROOT%" (
         echo Creating build directory for %TARGET%...
         mkdir "%BUILD_ROOT%" || exit /B %ERRORLEVEL%
-        xcopy /S "%PATH_TO_LIBZMQ_DIST%" "%BUILD_ROOT%" || exit /B %ERRORLEVEL%        
-    )
+        xcopy /S "%PATH_TO_LIBZMQ_DIST%" "%BUILD_ROOT%" || exit /B %ERRORLEVEL%
+        mkdir "%BUILD_ROOT%\cmake-build" || exit /B %ERRORLEVEL%
+        PUSHD "%BUILD_ROOT%\cmake-build" || exit /B %ERRORLEVEL%
 
+        echo Running cmake...
+        cmake -G "%VSGEN_NAME%%VSGEN_PLATFORM%" ^
+                 -DCMAKE_CXX_FLAGS_RELEASE=/MT -DCMAKE_CXX_FLAGS_DEBUG=/MTd ^
+                 -DCMAKE_CXX_FLAGS="/Z7 /EHsc /D_WIN32_WINNT=%MIN_WIN_NT_VERSION% /DWINVER=%MIN_WIN_NT_VERSION%" ^
+                 %CMAKE_OPTS% ^
+                 .. || (
+            POPD & exit /B 1
+        )
+        POPD
+    )
+    
     PUSHD "%BUILD_ROOT%" || exit /B %ERRORLEVEL%
     echo Building architecture "%~1"...
-    CALL :do_msbuild_libzmq StaticRelease libzmq "%OUTPUT_ROOT%" || (
+    CALL :do_msbuild_libzmq Release libzmq "%OUTPUT_ROOT%" || (
         POPD & exit /B 1
     )
     
     echo Building debug architecture "%~1"...
-    CALL :do_msbuild_libzmq StaticDebug libzmq-dbg "%OUTPUT_ROOT%" || (
+    CALL :do_msbuild_libzmq Debug libzmq-dbg "%OUTPUT_ROOT%" || (
         POPD & exit /B 1
     )
     
