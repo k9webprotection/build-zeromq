@@ -1,12 +1,12 @@
 ## ZeroMQ Building ##
 
-This project provides some prebuilt ZeroMQ configuration scripts for easy building on various platforms.  It contains as a submodule, the [toonetown/libzmq][libzmq-release].  In addition, it contains the following bindings for libzmq:
+This project provides some prebuilt ZeroMQ configuration scripts for easy building on various platforms.  It contains as a submodule, the [libzmq][libzmq-release].  In addition, it contains the following bindings for libzmq:
 
  - [C++ binding for 0MQ][cppzmq-release] (Header-only)
  - [ZMQ C++ wrapper (with no added magic)][zmqcpp-release] (Header-only)
  - [C++ binding with Boost::ASIO integration][azmq-release] (Header-only)
 
-You can check these directories out in any location on your computer, but the default location that the `build.sh` script looks for is as a parent directory to where you check out the [toonetown/libzmq][libzmq-release] and within the `bindings` directory for the binding git projects.  By default, this project contains submodules of the subprojects in the correct locations.
+You can check these directories out in any location on your computer, but the default location that the `build.sh` script looks for is as a parent directory to where you check out the [libzmq][libzmq-release] and within the `bindings` directory for the binding git projects.  By default, this project contains submodules of the subprojects in the correct locations.
 
 [libzmq-release]: https://github.com/toonetown/libzmq
 [cppzmq-release]: https://github.com/toonetown/cppzmq

@@ -1,12 +1,12 @@
 [submodule "libzmq"]
 	path = libzmq
-	url = https://github.com/toonetown/libzmq.git
+	url = ../libzmq.git
 [submodule "bindings/azmq"]
 	path = bindings/azmq
-	url = https://github.com/toonetown/azmq.git
+	url = ../azmq.git
 [submodule "bindings/cppzmq"]
 	path = bindings/cppzmq
-	url = https://github.com/toonetown/cppzmq.git
+	url = ../cppzmq.git
 [submodule "bindings/zmqcpp"]
 	path = bindings/zmqcpp
-	url = https://github.com/toonetown/zmqcpp.git
+	url = ../zmqcpp.git
