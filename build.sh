@@ -280,8 +280,9 @@ do_package() {
     do_combine_headers || return $?
     
     # Build the tarball
-    BASE="zeromq-$(grep '^Version:' "${PATH_TO_LIBZMQ_DIST}/packaging/redhat/zeromq.spec" | \
-                   cut -d':' -f2 | sed -e 's/ *//g')"
+    BASE="zeromq-$(cat ${PATH_TO_LIBZMQ_DIST}/configure.ac | \
+                   sed -nE 's/^# ZeroMQ version ([0-9\.]+):.*$/\1/p' | \
+                   tail -1)"
     cp -r "${OBJDIR_ROOT}" "${BASE}" || exit $?
     rm -rf "${BASE}/"*"/build" "${BASE}/logs" || exit $?
     rm -rf "${BASE}/objdir-macosx.x86_64" || return $?
