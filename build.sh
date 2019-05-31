@@ -6,7 +6,7 @@ cd ->/dev/null
 
 # Homebrew bootstrapping information
 : ${HB_BOOTSTRAP_GIST_URL:="https://gist.githubusercontent.com/toonetown/48101686e509fda81335/raw"}
-HB_BOOTSTRAP="b:autoconf b:automake b:libtool b:dos2unix
+HB_BOOTSTRAP="b:autoconf b:automake b:pkg-config b:libtool b:dos2unix
               t:toonetown/extras b:toonetown-extras s:toonetown-extras"
 
 # Overridable build locations
