@@ -20,7 +20,17 @@ IF "%MSVC_VERSION%"=="" (
     SET BUILD_PLATFORM_NAME=windows-msvc-%MSVC_VERSION%
 )
 IF "%MSVC_VERSION_INT%"=="14.1" (
-    SET MSBUILD_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe
+    SET MSBUILD_ENTERPRISE_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe
+    SET MSBUILD_PROFESSIONAL_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe
+    IF EXIST "!MSBUILD_ENTERPRISE_EXE!" (
+        SET MSBUILD_EXE=!MSBUILD_ENTERPRISE_EXE!
+    ) ELSE IF EXIST "!MSBUILD_PROFESSIONAL_EXE!" (
+        SET MSBUILD_EXE=!MSBUILD_PROFESSIONAL_EXE!
+    ) ELSE (
+        echo Uninstalled MSVC for "%MSVC_VERSION_INT%". 1>&2
+        echo. 1>&2
+        GOTO print_usage
+    )    
     SET VSVERSION=vs2017
     SET VSGEN_NAME=Visual Studio 15 2017
 ) ELSE IF "%MSVC_VERSION_INT%"=="14.0" (
