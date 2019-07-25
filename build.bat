@@ -13,13 +13,27 @@ IF "%CONFIGS_DIR%"=="" SET CONFIGS_DIR=%BUILD_DIR%\configs
 
 :: Options to control the build
 IF "%MSVC_VERSION%"=="" (
-    SET MSVC_VERSION_INT=14.1
+    SET MSVC_VERSION_INT=14.2
     SET BUILD_PLATFORM_NAME=windows
 ) ELSE (
     SET MSVC_VERSION_INT=%MSVC_VERSION%
     SET BUILD_PLATFORM_NAME=windows-msvc-%MSVC_VERSION%
 )
-IF "%MSVC_VERSION_INT%"=="14.1" (
+IF "%MSVC_VERSION_INT%"=="14.2" (
+    SET MSBUILD_ENTERPRISE_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe
+    SET MSBUILD_PROFESSIONAL_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe
+    IF EXIST "!MSBUILD_ENTERPRISE_EXE!" (
+        SET MSBUILD_EXE=!MSBUILD_ENTERPRISE_EXE!
+    ) ELSE IF EXIST "!MSBUILD_PROFESSIONAL_EXE!" (
+        SET MSBUILD_EXE=!MSBUILD_PROFESSIONAL_EXE!
+    ) ELSE (
+        echo Uninstalled MSVC for "%MSVC_VERSION_INT%". 1>&2
+        echo. 1>&2
+        GOTO print_usage
+    )    
+    SET VSVERSION=vs2019
+    SET VSGEN_NAME=Visual Studio 16 2019
+) ELSE IF "%MSVC_VERSION_INT%"=="14.1" (
     SET MSBUILD_ENTERPRISE_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe
     SET MSBUILD_PROFESSIONAL_EXE=C:\Program Files (x86^)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe
     IF EXIST "!MSBUILD_ENTERPRISE_EXE!" (
@@ -185,7 +199,7 @@ exit /B 0
         PUSHD "%BUILD_ROOT%\cmake-build" || exit /B %ERRORLEVEL%
 
         echo Running cmake...
-        cmake -G "%VSGEN_NAME%%VSGEN_PLATFORM%" ^
+        cmake -G "%VSGEN_NAME_FULL%" %VSGEN_ARCH% ^
                  -DCMAKE_CXX_FLAGS_RELEASE=/MT -DCMAKE_CXX_FLAGS_DEBUG=/MTd ^
                  -DCMAKE_CXX_FLAGS="/Z7 /EHsc /D_WIN32_WINNT=%MIN_WIN_NT_VERSION% /DWINVER=%MIN_WIN_NT_VERSION%" ^
                  %CMAKE_OPTS% ^
